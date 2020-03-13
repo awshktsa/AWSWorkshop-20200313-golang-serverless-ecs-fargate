@@ -1,6 +1,6 @@
 # AWSTPEWorkshop-20200313-golang-serverless-ecs-fargate
 For this workshop, we will have a quick review about how to deploy lambda and ecs-fargate. And this time, we will use "GO" as our target application language.
-- Start from 2018, AWS Lambda support Go for developing serverless application - https://aws.amazon.com/about-aws/whats-new/2018/01/aws-lambda-supports-go/(https://aws.amazon.com/about-aws/whats-new/2018/01/aws-lambda-supports-go/)
+- Start from 2018, AWS Lambda support Go for developing serverless application - [https://aws.amazon.com/about-aws/whats-new/2018/01/aws-lambda-supports-go/](https://aws.amazon.com/about-aws/whats-new/2018/01/aws-lambda-supports-go/)
 And we work with Golang Community to have this workshop together, we will use lambda to build a "Go Hello World - Serverless", and also we will extend the infrastructure to Elastic Container Service - Fargate with "Web service Framework -Gin".
 ------
 
@@ -21,7 +21,7 @@ Pick one region close to you.
 - Enter "Name" and "Description" for your Environment, and click Next Step
 - Select "Create a new instance for environment (EC2)" for Environment Type
 - Select "t2.micro" for Instance Type
-- Select "Amazon Linux" for Platform, and click Next Step
+- Select "Ubuntu Server xx.xx" for Platform, and click Next Step
 - Input Tag Key and Value if you want, and click "Create Environment"
 
 ------
@@ -44,7 +44,7 @@ Pick one region close to you.
 
 ### Step 4: Setup Go Development Environment in your Cloud9
 - After the IDE launch, click to "bash" tab in the botton of the IDE page
-- We will follow the AWS Cloud9 User Guide to setup our Go env - https://docs.aws.amazon.com/cloud9/latest/user-guide/sample-go.html(https://docs.aws.amazon.com/cloud9/latest/user-guide/sample-go.html) has all the detail, and we copy the mendatory shell command in below:
+- We will follow the AWS Cloud9 User Guide to setup our Go env - [https://docs.aws.amazon.com/cloud9/latest/user-guide/sample-go.html](https://docs.aws.amazon.com/cloud9/latest/user-guide/sample-go.html) has all the detail, and we copy the mendatory shell command in below:
 
 ```
 sudo yum -y update
@@ -55,8 +55,8 @@ rm ./go1.9.3.linux-amd64.tar.gz                                       # Delete t
 
 Then Edit the **~/.bashrc** with your preferred editor like **vim**, and append 
 ```
-PATH=$PATH:/usr/local/go/bin
 GOPATH=~/environment/go
+PATH=$PATH:$GOPATH/bin
 
 export GOPATH
 ```
@@ -112,7 +112,7 @@ go get -u github.com/golang/dep/cmd/dep
 ### Step 5:
 We are going to reuse previous workshop content by **Pahud** --> https://github.com/pahud/lambda-gin-refarch
 ```
-$ cd $GOROOT/src
+$ cd $GOPATH/src
 $ git clone https://github.com/pahud/lambda-gin-refarch.git
 $ cd lambda-gin-refarch
 $ dep ensure -v
@@ -123,15 +123,25 @@ S3TMPBUCKET	?= XXXX-golang-workshop-20200313
 STACKNAME	?= lambda-gin-refarch
 LAMBDA_REGION ?= us-east-1
 ```
-***S3TMPBUCKET*** - change this to your private S3 bucket and make sure you have read/write access to it. This is an intermediate S3 bucket for AWS SAM CLI to deploy as a staging bucket.
-***STACKNAME*** - change this to your favorite cloudformatoin stack name.
-***LAMBDA_REGION*** - the region ID you are deploying to
+
+- ***S3TMPBUCKET*** - change this to your private S3 bucket and make sure you have read/write access to it. This is an intermediate S3 bucket for AWS SAM CLI to deploy as a staging bucket.
+- ***STACKNAME*** - change this to your favorite cloudformatoin stack name.
+- ***LAMBDA_REGION*** - the region ID you are deploying to
 When you complete, Just run make world and you will see the go build, zip the compiled binary main into main.zip and sam deploy to deploy your main.zip bundle AWS Lambda and provision API Gateway together.
+
 ```
 $ make dep build pack
 # now go to cdk directory to deploy the stack
+
 $ cd cdk
+
 $ cdk deploy
+...
+Do you wish to deploy these changes (y/n)? y
+...
+Outputs:
+CdkStack.APIEndpointXXXXXXXXX = https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod/
+...
 ```
 
 *Get your API Gateway URL*
