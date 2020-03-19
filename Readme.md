@@ -12,7 +12,7 @@ In this workshop, you will learn following tools to work with AWS:
 ------
 ### Step 1:
 * Switch Region on the AWS console, a drag down menu near right-up corner.
-Pick one region close to you.
+Pick one region close to you, if you don't have any prefer, use **us-east-1**
 
 ------
 
@@ -30,15 +30,13 @@ Pick one region close to you.
 - ** AWS Console > Services > IAM > Role **
 - Create Role, service pick "EC2" and click "Next"
 - Search "AmazonS3FullAccess" and click the check box
-- Search "AWSLambdaFullAccess" and click the check box
-- Search "AmazonEC2ContainerRegistryFullAccess" and click the check box
-- Search "AmazonECS_FullAccess" and clieck the check box
+- also search following policies and attach to this role: "AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess"
 - Click Next, Inut Tag Key and Value if you want, click Next to enter "Name" and "Description" for the Role.
 - Input "golang-workshop-cloud9-role" for the "Name" and click "Create".
 
 * 3-b: For user who want to use your own laptop instead of using Cloud9
 - ** AWS Console > Services > IAM > User **
-- Create User and attach following policy to this user: ["AmazonS3FullAccess","AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess"]
+- Create User and attach following policy to this user: ["AmazonS3FullAccess","AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess"]
 - Generate the credential "ACCESS_KEY" and "SECRET_KEY" and keep it safe, never share with anybody else and remeber to deactivate this user after workshop.
 ------
 
@@ -51,13 +49,16 @@ sudo yum -y update
 wget https://storage.googleapis.com/golang/go1.9.3.linux-amd64.tar.gz # Download the Go installer.
 sudo tar -C /usr/local -xzf ./go1.9.3.linux-amd64.tar.gz              # Install Go.
 rm ./go1.9.3.linux-amd64.tar.gz                                       # Delete the installer.
+mkdir $GOPATH
+mkdir $GOPATH/src 
+mkdir $GOPATH/bin 
 ```
 
 Then Edit the **~/.bashrc** with your preferred editor like **vim**, and append 
 ```
 PATH=$PATH:/usr/local/go/bin
 GOPATH=~/environment/go
-
+PATH=$PATH:$GOPATH/bin
 export GOPATH
 ```
 in the end of the file.
@@ -112,28 +113,114 @@ go get -u github.com/golang/dep/cmd/dep
 ### Step 5:
 We are going to reuse previous workshop content by **Pahud** --> https://github.com/pahud/lambda-gin-refarch
 ```
-$ cd $GOROOT/src
-$ git clone https://github.com/pahud/lambda-gin-refarch.git
-$ cd lambda-gin-refarch
-$ dep ensure -v
+cd $GOPATH/src
+git clone https://github.com/pahud/lambda-gin-refarch.git
+cd lambda-gin-refarch
+dep ensure -v
+```
+Create a S3 Bucket for the deploying the GO application
+We use "golang-workshop-bucket-1234" as this example.
+**Please change the bucket name in your practice**
+**And also check if you are using correct region command setting**
+```
+aws s3api create-bucket --bucket golang-workshop-bucket-1234 --region us-east-1
+###
+###If you are using any region not us-east-1, please append LocationConstraint
+aws s3api create-bucket --bucket golang-workshop-bucket-1234 --region ap-southeast-1 --create-bucket-configuration LocationConstraint=ap-southeast-1
 ```
 Edit *Makefile* and update the following variables
 ```
-S3TMPBUCKET	?= XXXX-golang-workshop-20200313
+S3TMPBUCKET	?= golang-workshop-bucket-1234
 STACKNAME	?= lambda-gin-refarch
 LAMBDA_REGION ?= us-east-1
 ```
 ***S3TMPBUCKET*** - change this to your private S3 bucket and make sure you have read/write access to it. This is an intermediate S3 bucket for AWS SAM CLI to deploy as a staging bucket.
 ***STACKNAME*** - change this to your favorite cloudformatoin stack name.
 ***LAMBDA_REGION*** - the region ID you are deploying to
-When you complete, Just run make world and you will see the go build, zip the compiled binary main into main.zip and sam deploy to deploy your main.zip bundle AWS Lambda and provision API Gateway together.
 ```
-$ make dep build pack
-# now go to cdk directory to deploy the stack
-$ cd cdk
-$ cdk deploy
+make world
+```
+and you will see the output message:
 ```
 
+Checking dependencies...
+Building...
+Packing binary...
+  adding: main (deflated 64%)
+
+        SAM CLI now collects telemetry to better understand customer needs.
+
+        You can OPT OUT and disable telemetry collection by setting the
+        environment variable SAM_CLI_TELEMETRY=0 in your shell.
+        Thanks for your help!
+
+        Learn More: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-telemetry.html
+
+
+        Deploying with following values
+        ===============================
+        Stack name                 : lambda-gin-refarch
+        Region                     : None
+        Confirm changeset          : False
+        Deployment s3 bucket       : golang-workshop-bucket-1234
+        Capabilities               : ["CAPABILITY_IAM"]
+        Parameter overrides        : {}
+
+Initiating deployment
+=====================
+Uploading to 0950cdbeef24ce21e02bb9713a502de6  4127265 / 4127265.0  (100.00%)
+Uploading to 41b245584c0d88957ae07013d98a570a.template  734 / 734.0  (100.00%)
+Waiting for changeset to be created..
+
+CloudFormation stack changeset
+------------------------------------------------------------------------------------------------
+Operation                        LogicalResourceId                ResourceType                   
+------------------------------------------------------------------------------------------------
+* Modify                         SampleFunction                   AWS::Lambda::Function          
+* Modify                         ServerlessRestApi                AWS::ApiGateway::RestApi       
+------------------------------------------------------------------------------------------------
+
+Changeset created successfully. arn:aws:cloudformation:ap-southeast-1:384612698411:changeSet/samcli-deploy1584628047/0f79aaa0-233f-4bf2-8421-4b9258d31029
+
+
+2020-03-19 14:27:37 - Waiting for stack create/update to complete
+
+CloudFormation events from changeset
+-------------------------------------------------------------------------------------------------
+ResourceStatus           ResourceType             LogicalResourceId        ResourceStatusReason   
+-------------------------------------------------------------------------------------------------
+UPDATE_IN_PROGRESS       AWS::Lambda::Function    SampleFunction           -                      
+UPDATE_COMPLETE          AWS::Lambda::Function    SampleFunction           -                      
+UPDATE_COMPLETE_CLEANU   AWS::CloudFormation::S   lambda-gin-refarch       -                      
+P_IN_PROGRESS            tack                                                                     
+UPDATE_COMPLETE          AWS::CloudFormation::S   lambda-gin-refarch       -                      
+                         tack                                                                     
+-------------------------------------------------------------------------------------------------
+
+CloudFormation outputs from deployed stack
+-------------------------------------------------------------------------------------------------
+Outputs                                                                                         
+-------------------------------------------------------------------------------------------------
+Key                 DemoGinApi                                                                  
+Description         URL for application                                                         
+Value               https://aeudzdz4mb.execute-api.ap-southeast-1.amazonaws.com/Prod/ping       
+-------------------------------------------------------------------------------------------------
+
+Successfully created/updated stack - lambda-gin-refarch in ap-southeast-1
+
+
+# print the cloudformation stack outputs
+aws --region ap-southeast-1 cloudformation describe-stacks --stack-name "lambda-gin-refarch" --query 'Stacks[0].Outputs'
+[
+    {
+        "Description": "URL for application", 
+        "ExportName": "DemoGinApi", 
+        "OutputKey": "DemoGinApi", 
+        "OutputValue": "https://aeudzdz4mb.execute-api.ap-southeast-1.amazonaws.com/Prod/ping"
+    }
+]
+[OK] Layer version deployed.
+```
 *Get your API Gateway URL*
 You will see the API Gateway URL in the OutputValue above. Try request the URL with cURL or http browser:
 ```
@@ -196,7 +283,13 @@ docker push 384612698411.dkr.ecr.ap-southeast-1.amazonaws.com/golang-gin-ecs-far
 
 ### Step 7:
 * Use CDK to deploy the Docker Image onto ECS-Task on Fargate
-* Download the cdk sub-dir in this repository, and you can see following file
+* Download the cdk sub-dir in this repository,
+```
+cd ~/environment
+git clone https://github.com/awshktsa/AWSWorkshop-20200313-golang-serverless-ecs-fargate
+cd AWSWorkshop-20200313-golang-serverless-ecs-fargate/cdk
+```
+and you can see following file
 ```
 - cdk.json
 - index.ts
@@ -204,12 +297,17 @@ docker push 384612698411.dkr.ecr.ap-southeast-1.amazonaws.com/golang-gin-ecs-far
 - tsconfig.json
 ```
 
-And you need to edit index.ts
+And you need to edit index.ts, which is to point the deployed docker from your repository
 ```
 // and replace the ECR_NAME with your ecr name like XXXXXXX.ecr.ap-southeast-1.amazonaws.com
 image: ecs.ContainerImage.fromEcrRepository(ecr.Repository.fromRepositoryName(this,"ECR_NAME","golang-gin-ecs-fargate")),
 ```
-Then proceed with following command:
+Before we use CDK deploy, you need to setup the environment variable: ***CDK_DEFAULT_ACCOUNT***, and ***CDK_DEFAULT_REGION***
+```
+export CDK_DEFAULT_ACCOUNT=12345678901234
+export CDK_DEFAULT_REGION=us-east-1
+```
+Everything is ready, now use following command to deploy the stack.
 ```
 npm inistall
 npm run build
