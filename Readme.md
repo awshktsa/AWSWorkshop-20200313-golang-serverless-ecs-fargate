@@ -17,7 +17,7 @@ Pick one region close to you, if you don't have any prefer, use **us-east-1**
 ------
 ### Step 2: Setup IAM Role/User for this workshop
 * 2-a: For user who want to use Cloud9
-- ** AWS Console > Services > IAM > Role **
+- **AWS Console > Services > IAM > Role**
 - Create Role, service pick "EC2" and click "Next"
 - Search "AmazonS3FullAccess" and click the check box
 - also search following policies and attach to this role: "AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess","IAMFullAccess"
@@ -25,7 +25,7 @@ Pick one region close to you, if you don't have any prefer, use **us-east-1**
 - Input "golang-workshop-cloud9-role" for the "Name" and click "Create".
 
 * 2-b: For user who want to use your own laptop instead of using Cloud9
-- ** AWS Console > Services > IAM > User **
+- **AWS Console > Services > IAM > User**
 - Create User and attach following policy to this user: ["AmazonS3FullAccess","AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess","IAMFullAccess"]
 - Generate the credential "ACCESS_KEY" and "SECRET_KEY" and keep it safe, never share with anybody else and remeber to deactivate this user after workshop.
 ------
@@ -71,13 +71,15 @@ Source the configuration file:
 ```
 . ~/.bashrc
 ```
+------
 
 Now, use command like to check if you have go in your environment
 ```
 go help
 ```
 And you will see something like this:
-**
+
+```
 Go is a tool for managing Go source code.
 
 Usage:
@@ -102,7 +104,8 @@ The commands are:
         tool        run specified go tool
         version     print Go version
         vet         run go tool vet on packages
-**
+```
+------
 
 After you have go in your env, use following command to install dependency check tool "dep"
 ```
@@ -112,8 +115,8 @@ or
 ```
 go get -u github.com/golang/dep/cmd/dep
 ```
-------
 
+------
 ### Step 5:
 We are going to reuse previous workshop content by **Pahud** --> https://github.com/pahud/lambda-gin-refarch
 ```
@@ -356,7 +359,7 @@ Security Group Changes
 
 Do you wish to deploy these changes (y/n)? 
 ```
-***press Y <enter> then it will start to deploy the ECS Fargate for you 
+***press Y <enter> then it will start to deploy the ECS Fargate for you***
         
 ### After Workshop -- Clean up
 * *** clean up the ECS-Fargate stack with "cdk destroy"***
