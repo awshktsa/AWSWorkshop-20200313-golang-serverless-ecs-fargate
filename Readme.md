@@ -4,10 +4,10 @@ For this workshop, we will have a quick review about how to deploy lambda and ec
 And we work with Golang Community to have this workshop together, we will use lambda to build a "Go Hello World - Serverless", and also we will extend the infrastructure to Elastic Container Service - Fargate with "Web service Framework -Gin".
 ------
 
-In this workshop, you will learn following tools to work with AWS:
-1. awscli
-2. sam for lambda 
-3. cdk
+##In this workshop, you will learn following tools to work with AWS:
+1. awscli - AWS Command Lint Tool Official Site https://aws.amazon.com/tw/cli/(https://aws.amazon.com/tw/cli/)
+2. sam for lambda - What is SAM(https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
+3. cdk - AWS Cloud Development Kit Official Site https://aws.amazon.com/cdk/?nc1=h_ls(https://aws.amazon.com/cdk/?nc1=h_ls)
 
 ------
 ### Step 1:
@@ -15,30 +15,34 @@ In this workshop, you will learn following tools to work with AWS:
 Pick one region close to you, if you don't have any prefer, use **us-east-1**
 
 ------
+### Step 2: Setup IAM Role/User for this workshop
+* 2-a: For user who want to use Cloud9
+- ** AWS Console > Services > IAM > Role **
+- Create Role, service pick "EC2" and click "Next"
+- Search "AmazonS3FullAccess" and click the check box
+- also search following policies and attach to this role: "AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess","IAMFullAccess"
+- Click Next, Inut Tag Key and Value if you want, click Next to enter "Name" and "Description" for the Role.
+- Input "golang-workshop-cloud9-role" for the "Name" and click "Create".
 
-### Step 2: Launch a Cloud9 IDE for our workshop env (Note: if you already had a working environment in your local laptop, then please skip this step and jump to Step 3-b)
+* 2-b: For user who want to use your own laptop instead of using Cloud9
+- ** AWS Console > Services > IAM > User **
+- Create User and attach following policy to this user: ["AmazonS3FullAccess","AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess","IAMFullAccess"]
+- Generate the credential "ACCESS_KEY" and "SECRET_KEY" and keep it safe, never share with anybody else and remeber to deactivate this user after workshop.
+------
+
+### Step 3: Launch a Cloud9 IDE for our workshop env (Note: if you already had a working environment in your local laptop, then please skip this step and jump to Step 3-b)
 * **AWS Console > Services > Cloud9 > Create Environment**
 - Enter "Name" and "Description" for your Environment, and click Next Step
 - Select "Create a new instance for environment (EC2)" for Environment Type
 - Select "t2.micro" for Instance Type
 - Select "Amazon Linux" for Platform, and click Next Step
 - Input Tag Key and Value if you want, and click "Create Environment"
-
 ------
-### Step 3: Setup IAM Role/User for this workshop
-* 3-a: For user who want to use Cloud9
-- ** AWS Console > Services > IAM > Role **
-- Create Role, service pick "EC2" and click "Next"
-- Search "AmazonS3FullAccess" and click the check box
-- also search following policies and attach to this role: "AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess"
-- Click Next, Inut Tag Key and Value if you want, click Next to enter "Name" and "Description" for the Role.
-- Input "golang-workshop-cloud9-role" for the "Name" and click "Create".
-
-* 3-b: For user who want to use your own laptop instead of using Cloud9
-- ** AWS Console > Services > IAM > User **
-- Create User and attach following policy to this user: ["AmazonS3FullAccess","AWSLambdaFullAccess","AmazonEC2ContainerRegistryFullAccess","AmazonECS_FullAccess","AWSCloudFormationFullAccess","AmazonVPCFullAccess"]
-- Generate the credential "ACCESS_KEY" and "SECRET_KEY" and keep it safe, never share with anybody else and remeber to deactivate this user after workshop.
+***Then we need to Attach the IAM Role onto this Cloud9 Environment***
+- **AWS Console > Services > EC2 > Instances > Click the EC2 Instance for your Cloud9 > Actions > Instance Settings > Attach/Replace IAM Role > Choose the IAM Role we created in Step2**
+- **Back to Cloud9 > Cloud9 Icon (Upper Left Corner) > Perference > AWS Settings > Credential > AWS Managed Temperory Credential > Off**
 ------
+
 
 ### Step 4: Setup Go Development Environment in your Cloud9
 - After the IDE launch, click to "bash" tab in the botton of the IDE page
@@ -314,6 +318,48 @@ npm run build
 cdk synth
 cdk deploy
 ```
+***And you might see following result in your terminal:***
+```
+This deployment will make potentially sensitive changes according to your current security approval level (--require-approval broadening).
+Please confirm you intend to make the following modifications:
 
+IAM Statement Changes
+┌───┬───────────────────────────────────────────┬────────┬───────────────────────────────────────────┬───────────────────────────────────────────┬───────────┐
+│   │ Resource                                  │ Effect │ Action                                    │ Principal                                 │ Condition │
+├───┼───────────────────────────────────────────┼────────┼───────────────────────────────────────────┼───────────────────────────────────────────┼───────────┤
+│ + │ ${FargateService/TaskDef/ExecutionRole.Ar │ Allow  │ sts:AssumeRole                            │ Service:ecs-tasks.amazonaws.com           │           │
+│   │ n}                                        │        │                                           │                                           │           │
+├───┼───────────────────────────────────────────┼────────┼───────────────────────────────────────────┼───────────────────────────────────────────┼───────────┤
+│ + │ ${FargateService/TaskDef/TaskRole.Arn}    │ Allow  │ sts:AssumeRole                            │ Service:ecs-tasks.amazonaws.com           │           │
+├───┼───────────────────────────────────────────┼────────┼───────────────────────────────────────────┼───────────────────────────────────────────┼───────────┤
+│ + │ ${FargateService/TaskDef/web/LogGroup.Arn │ Allow  │ logs:CreateLogStream                      │ AWS:${FargateService/TaskDef/ExecutionRol │           │
+│   │ }                                         │        │ logs:PutLogEvents                         │ e}                                        │           │
+├───┼───────────────────────────────────────────┼────────┼───────────────────────────────────────────┼───────────────────────────────────────────┼───────────┤
+│ + │ *                                         │ Allow  │ ecr:GetAuthorizationToken                 │ AWS:${FargateService/TaskDef/ExecutionRol │           │
+│   │                                           │        │                                           │ e}                                        │           │
+├───┼───────────────────────────────────────────┼────────┼───────────────────────────────────────────┼───────────────────────────────────────────┼───────────┤
+│ + │ arn:${AWS::Partition}:ecr:ap-southeast-1: │ Allow  │ ecr:BatchCheckLayerAvailability           │ AWS:${FargateService/TaskDef/ExecutionRol │           │
+│   │ 384612698411:repository/golang-gin-ecs-fa │        │ ecr:BatchGetImage                         │ e}                                        │           │
+│   │ rgate                                     │        │ ecr:GetDownloadUrlForLayer                │                                           │           │
+└───┴───────────────────────────────────────────┴────────┴───────────────────────────────────────────┴───────────────────────────────────────────┴───────────┘
+Security Group Changes
+┌───┬─────────────────────────────────────────────────┬─────┬────────────┬─────────────────────────────────────────────────┐
+│   │ Group                                           │ Dir │ Protocol   │ Peer                                            │
+├───┼─────────────────────────────────────────────────┼─────┼────────────┼─────────────────────────────────────────────────┤
+│ + │ ${FargateService/LB/SecurityGroup.GroupId}      │ In  │ TCP 80     │ Everyone (IPv4)                                 │
+│ + │ ${FargateService/LB/SecurityGroup.GroupId}      │ Out │ TCP 80     │ ${FargateService/Service/SecurityGroup.GroupId} │
+├───┼─────────────────────────────────────────────────┼─────┼────────────┼─────────────────────────────────────────────────┤
+│ + │ ${FargateService/Service/SecurityGroup.GroupId} │ In  │ TCP 80     │ ${FargateService/LB/SecurityGroup.GroupId}      │
+│ + │ ${FargateService/Service/SecurityGroup.GroupId} │ Out │ Everything │ Everyone (IPv4)                                 │
+└───┴─────────────────────────────────────────────────┴─────┴────────────┴─────────────────────────────────────────────────┘
+(NOTE: There may be security-related changes not in this list. See https://github.com/aws/aws-cdk/issues/1299)
+
+Do you wish to deploy these changes (y/n)? 
+```
+***press Y <enter> then it will start to deploy the ECS Fargate for you 
+        
 ### After Workshop -- Clean up
-* clean up the stack with "cdk destroy"
+* *** clean up the ECS-Fargate stack with "cdk destroy"***
+* *** cloud up the Lambda SAM with "aws cloudformation delete-stack --stack-name=lambda-gin-refarch"***
+* *** Terminate the Cloud9 Env from AWS Console > Cloud9 > Environment > Delete***
+* *** Remove IAM Role/User from AWS Console > IAM > Role/User > Delete***
