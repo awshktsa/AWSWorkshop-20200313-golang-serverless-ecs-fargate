@@ -4,7 +4,7 @@ For this workshop, we will have a quick review about how to deploy lambda and ec
 And we work with Golang Community to have this workshop together, we will use lambda to build a "Go Hello World - Serverless", and also we will extend the infrastructure to Elastic Container Service - Fargate with "Web service Framework -Gin".
 ------
 
-##In this workshop, you will learn following tools to work with AWS:
+## In this workshop, you will learn following tools to work with AWS:
 1. awscli - AWS Command Lint Tool Official Site https://aws.amazon.com/tw/cli/(https://aws.amazon.com/tw/cli/)
 2. sam for lambda - What is SAM(https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
 3. cdk - AWS Cloud Development Kit Official Site https://aws.amazon.com/cdk/?nc1=h_ls(https://aws.amazon.com/cdk/?nc1=h_ls)
