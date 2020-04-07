@@ -53,9 +53,6 @@ sudo yum -y update
 wget https://storage.googleapis.com/golang/go1.9.3.linux-amd64.tar.gz # Download the Go installer.
 sudo tar -C /usr/local -xzf ./go1.9.3.linux-amd64.tar.gz              # Install Go.
 rm ./go1.9.3.linux-amd64.tar.gz                                       # Delete the installer.
-mkdir $GOPATH
-mkdir $GOPATH/src 
-mkdir $GOPATH/bin 
 ```
 
 Then Edit the **~/.bashrc** with your preferred editor like **vim**, and append 
@@ -67,9 +64,12 @@ export GOPATH
 ```
 in the end of the file.
 
-Source the configuration file:
+Source the configuration file and also create golang related directories for this workshop:
 ```
 . ~/.bashrc
+mkdir $GOPATH
+mkdir $GOPATH/src 
+mkdir $GOPATH/bin 
 ```
 ------
 
