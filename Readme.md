@@ -316,7 +316,7 @@ export CDK_DEFAULT_REGION=us-east-1
 ```
 Everything is ready, now use following command to deploy the stack.
 ```
-npm inistall
+npm install
 npm run build
 cdk synth
 cdk deploy
